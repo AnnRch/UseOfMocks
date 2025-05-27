@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
 public class CustomerDAO implements DAO<Customer>{
 
     private List<Customer> customers;
-    private String filename = "customers-1000.csv";
+    private String filename = "customers-100.csv";
 
     public CustomerDAO(){
         customers = new ArrayList<>();
@@ -177,7 +177,7 @@ public class CustomerDAO implements DAO<Customer>{
         String content = convertCustomerToRecord(customer);
       try {
           Files.write(
-                  Paths.get("customers-1000.csv"),
+                  Paths.get("customers-100.csv"),
                   content.getBytes(),
                   StandardOpenOption.APPEND
           );
