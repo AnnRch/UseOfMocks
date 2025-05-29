@@ -5,16 +5,18 @@ import org.example.model.Customer;
 import org.example.service.impl.CustomerServiceImpl;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.mockito.Mockito.*;
 
@@ -70,6 +72,15 @@ public class CustomerServiceTest {
     }
 
     @Test
+    public void getAllEmptyCase(){
+
+        customerList = new ArrayList<>();
+        customerService = new CustomerServiceImpl(customerDAO);
+
+
+    }
+
+    @Test
     public void saveAppendTestCase() throws IOException {
 
         customerList = new ArrayList<>();
@@ -95,12 +106,35 @@ public class CustomerServiceTest {
     @Test
     public void deleteSuccessfulTestCase(){
 
+        customerList = new ArrayList<>();
+        customerList.add(customer1);
+        customerList.add(customer2);
+
+        customerService = new CustomerServiceImpl(customerDAO);
+
+        when(customerDAO.getById("122345")).thenReturn(customer1);
+        Assertions.assertSame(customer1, customerService.getCustomerById("122345"));
+
+        doAnswer(invocation -> {
+            customerList.remove(customer1);
+            Assertions.assertEquals(1, customerList.size());
+            return  null;
+        }).when(customerDAO).deleteById(anyString());
 
     }
 
 
     @Test
-    public void deleteThrowsException(){
+    public void deleteThrowsException() throws FileNotFoundException {
+        customerList = new ArrayList<>();
+        customerList.add(customer1);
 
+        customerService = new CustomerServiceImpl(customerDAO);
+
+        when(customerDAO.getById(anyString())).thenReturn(null);
+        Assertions.assertNull(customerService.getCustomerById(anyString()));
+
+        Assertions.assertThrows(Exception.class, () -> doThrow().when(customerService).deleteByCustomerId(anyString()), (String) isNull());
+//        Assertions.assertThrows(NoSuchElementException.class, () -> customerService.deleteByCustomerId(anyString()));
     }
 }
