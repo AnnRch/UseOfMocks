@@ -39,6 +39,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer save(Customer customer) throws IOException {
+        if(customer == null){
+            throw new NullPointerException("customer is null");
+        }
         return customerDAO.save(customer);
     }
 

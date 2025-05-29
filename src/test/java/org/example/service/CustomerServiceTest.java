@@ -77,8 +77,10 @@ public class CustomerServiceTest {
         customerList = new ArrayList<>();
         customerService = new CustomerServiceImpl(customerDAO);
 
-
+        when(customerDAO.getAll()).thenReturn(customerList);
+        Assertions.assertEquals(0, customerService.getAll().size());
     }
+
 
     @Test
     public void saveAppendTestCase() throws IOException {
@@ -91,6 +93,7 @@ public class CustomerServiceTest {
         Assertions.assertSame(customer1, customerService.save(customer1));
     }
 
+
     @Test
     public void saveUpdateTestCase() throws IOException {
         customerList = new ArrayList<>();
@@ -101,6 +104,15 @@ public class CustomerServiceTest {
         when(customerDAO.getById("122345")).thenReturn(customer1);
         when(customerDAO.save(customer1)).thenReturn(customer1);
         Assertions.assertSame(customer1, customerService.save(customer1));
+    }
+
+    @Test
+    public void saveNullTestCase(){
+
+        customerService = new CustomerServiceImpl(customerDAO);
+        when(customerDAO.getById(null)).thenThrow(NullPointerException.class);
+
+        Assertions.assertThrows(NullPointerException.class, () -> customerService.getCustomerById(null));
     }
 
     @Test
