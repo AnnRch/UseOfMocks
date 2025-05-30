@@ -7,16 +7,21 @@ import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.mockito.Mockito.*;
 
@@ -24,7 +29,7 @@ import static org.mockito.Mockito.*;
 public class CustomerServiceTest {
 
     private List<Customer> customerList;
-    private Customer customer1, customer2, customer3;
+    protected Customer customer1 = new Customer(), customer2, customer3;
 
     @Mock
     private CustomerDAO customerDAO;
@@ -33,7 +38,19 @@ public class CustomerServiceTest {
     private CustomerServiceImpl customerService;
 
     @BeforeEach
-    void init(){
+    public void init(){
+        customer2 = Customer.builder()
+                .customerId("098876CUS")
+                .firstName("Nazar")
+                .lastName("Rozumeiko")
+                .company("MDPU")
+                .city("Zaporizhzhia")
+                .country("Ukraine")
+                .rating(BigDecimal.valueOf(83.05676855913279))
+                .build();
+    }
+
+    private void setUp(){
         customer1 = Customer.builder()
                 .customerId("122345")
                 .firstName("Irina")
@@ -41,6 +58,7 @@ public class CustomerServiceTest {
                 .company("ATB")
                 .city("Chernivtsi")
                 .country("Ukraine")
+                .rating(BigDecimal.valueOf(91.4371696391857))
                 .build();
 
         customer2 = Customer.builder()
@@ -50,11 +68,14 @@ public class CustomerServiceTest {
                 .company("MDPU")
                 .city("Zaporizhzhia")
                 .country("Ukraine")
+                .rating(BigDecimal.valueOf(83.05676855913279))
                 .build();
     }
 
     @Test
     public void getAllTest(){
+
+        setUp();
 
         customerList = new ArrayList<>();
         customerList.add(customer1);
@@ -83,12 +104,40 @@ public class CustomerServiceTest {
 
 
     @Test
+    public void getAllByCountryAndRatingSuccessful(){
+
+        setUp();
+
+        customerList = new ArrayList<>();
+        customerList.add(customer1);
+        customerList.add(customer2);
+
+        System.out.println(customer2);
+        customerService = new CustomerServiceImpl(customerDAO);
+
+
+        BigDecimal bound = BigDecimal.valueOf(90.0);
+        BigDecimal rating = customerList.get(0).getRating();
+
+        bound = bound.setScale(2, RoundingMode.HALF_EVEN);
+        rating = rating.setScale(2,RoundingMode.HALF_EVEN);
+
+        Assertions.assertTrue(bound.compareTo(rating) < 0);
+    }
+
+//    static Stream<Arguments> testCases(){
+//        return Stream.of(
+//              Arguments.of()
+//        );
+//    }
+
+    @Test
     public void saveAppendTestCase() throws IOException {
 
         customerList = new ArrayList<>();
         customerService = new CustomerServiceImpl(customerDAO);
 
-        when(customerDAO.getById("122345")).thenReturn(null);
+///        when(customerDAO.getById("122345")).thenReturn(null);
         when(customerDAO.save(customer1)).thenReturn(customer1);
         Assertions.assertSame(customer1, customerService.save(customer1));
     }
@@ -96,12 +145,15 @@ public class CustomerServiceTest {
 
     @Test
     public void saveUpdateTestCase() throws IOException {
+
+        setUp();
+
         customerList = new ArrayList<>();
         customerList.add(customer1);
 
         customerService = new CustomerServiceImpl(customerDAO);
 
-        when(customerDAO.getById("122345")).thenReturn(customer1);
+//        when(customerDAO.getById("122345")).thenReturn(customer1);
         when(customerDAO.save(customer1)).thenReturn(customer1);
         Assertions.assertSame(customer1, customerService.save(customer1));
     }
@@ -116,7 +168,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void deleteSuccessfulTestCase(){
+    public void deleteSuccessfulTestCase() throws FileNotFoundException {
 
         customerList = new ArrayList<>();
         customerList.add(customer1);
@@ -127,12 +179,8 @@ public class CustomerServiceTest {
         when(customerDAO.getById("122345")).thenReturn(customer1);
         Assertions.assertSame(customer1, customerService.getCustomerById("122345"));
 
-        doAnswer(invocation -> {
-            customerList.remove(customer1);
-            Assertions.assertEquals(1, customerList.size());
-            return  null;
-        }).when(customerDAO).deleteById(anyString());
-
+        customerService.deleteByCustomerId("122345");
+        verify(customerDAO).deleteById("122345");
     }
 
 

@@ -6,7 +6,9 @@ import org.example.service.CustomerService;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class CustomerServiceImpl implements CustomerService {
@@ -35,6 +37,19 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<Customer> getAllByCountry(String country) {
         return customerDAO.findByCountry(country);
+    }
+
+    @Override
+    public List<Customer> getAllByCountryAndRatingMoreThan(String country, BigDecimal rating) {
+        return customerDAO.findByCountryAndRatingMoreThan(country, rating);
+    }
+
+    @Override
+    public List<Customer> getAllByCountryAndRatingMoreThanOrderByRatingAsc(String country, BigDecimal rating) {
+        return getAllByCountryAndRatingMoreThan(country, rating)
+                .stream()
+                .sorted(Comparator.comparing(Customer::getRating))
+                .toList();
     }
 
     @Override

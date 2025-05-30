@@ -12,5 +12,6 @@ public enum CustomerHeaders {
     PHONE2,
     EMAIL,
     SUBSCRIPTIONDATE,
-    WEBSITE
+    WEBSITE,
+    RATING
 }

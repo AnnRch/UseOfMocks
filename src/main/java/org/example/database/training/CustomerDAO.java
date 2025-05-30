@@ -226,20 +226,22 @@ public class CustomerDAO implements DAO<Customer> {
         Customer currentCustomer = findById(item.getCustomerId());
         if(currentCustomer == null){
 
-            currentCustomer = new Customer(
-                    (long) customers.size() + 1,
-                    item.getCustomerId(),
-                    item.getFirstName(),
-                    item.getLastName(),
-                    item.getCompany(),
-                    item.getCity(),
-                    item.getCountry(),
-                    item.getEmail(),
-                    item.getPhone1(),
-                    item.getPhone2(),
-                    item.getSubscriptionDate(),
-                    item.getWebsite()
-            );
+            currentCustomer = Customer.builder()
+                    .index( (long) customers.size() + 1)
+                    .customerId(item.getCustomerId())
+                    .firstName(item.getFirstName())
+                    .lastName(item.getLastName())
+                    .company( item.getCompany())
+                    .city(item.getCity())
+                    .country( item.getCountry())
+                    .email(item.getEmail())
+                    .phone1(item.getPhone1())
+                    .phone2( item.getPhone2())
+                    .subscriptionDate(item.getSubscriptionDate())
+                    .website(item.getWebsite())
+                    .rating(item.getRating())
+                    .build();
+
             customers.add(currentCustomer);
 
             String content = convertCustomerToRecord(currentCustomer);

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -25,5 +26,6 @@ public class Customer {
     private String phone2;
     private LocalDate subscriptionDate;
     private String website;
+    private BigDecimal rating;
 
 }

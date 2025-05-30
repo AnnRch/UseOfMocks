@@ -4,18 +4,17 @@ import org.example.database.enums.CustomerHeaders;
 import org.example.model.Customer;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class CustomerDAO implements DAO<Customer>{
 
     private List<Customer> customers;
-    private String filename = "customers-100.csv";
+    private String filename = "customers.csv";
 
     public CustomerDAO(){
         customers = new ArrayList<>();
@@ -64,6 +63,16 @@ public class CustomerDAO implements DAO<Customer>{
     }
 
     @Override
+    public List<Customer> findByCountryAndRatingMoreThan(String country, BigDecimal rating) {
+        return getAll().stream()
+                .filter(customer ->
+                        customer.getCountry().equals(country) &&
+                                customer.getRating().compareTo(rating) > 0)
+                .toList();
+    }
+
+
+    @Override
     public Customer save(Customer customer) {
         Customer currentCustomer = getById(customer.getCustomerId());
         if(currentCustomer == null){
@@ -80,6 +89,7 @@ public class CustomerDAO implements DAO<Customer>{
                     .phone2(customer.getPhone2())
                     .subscriptionDate(customer.getSubscriptionDate())
                     .website(customer.getWebsite())
+                    .rating(customer.getRating())
                     .build();
 
             customers.add(currentCustomer);
@@ -120,6 +130,13 @@ public class CustomerDAO implements DAO<Customer>{
         customer.setEmail(record[9]);
         customer.setSubscriptionDate(LocalDate.parse(record[10]));
         customer.setWebsite(record[11]);
+
+        BigDecimal rating = record[12].isEmpty() || record[12].equals("null")
+                ? BigDecimal.valueOf(0.0)
+                : BigDecimal.valueOf(Double.parseDouble(record[12]));
+
+        customer.setRating(rating);
+
         //...
         return customer;
     }
@@ -149,6 +166,8 @@ public class CustomerDAO implements DAO<Customer>{
                 customer.getSubscriptionDate() +
                 "," +
                 customer.getWebsite() +
+                "," +
+                customer.getRating() +
                 "\n";
     }
 
@@ -170,6 +189,7 @@ public class CustomerDAO implements DAO<Customer>{
         current.setPhone2(item.getPhone2());
         current.setSubscriptionDate(item.getSubscriptionDate());
         current.setWebsite(item.getWebsite());
+        current.setRating(item.getRating());
         //...
     }
 
@@ -177,7 +197,7 @@ public class CustomerDAO implements DAO<Customer>{
         String content = convertCustomerToRecord(customer);
       try {
           Files.write(
-                  Paths.get("customers-100.csv"),
+                  Paths.get("customers.csv"),
                   content.getBytes(),
                   StandardOpenOption.APPEND
           );
@@ -187,7 +207,7 @@ public class CustomerDAO implements DAO<Customer>{
     }
 
     private void rewriteCsvFile(){
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("customers-1000.csv"))){
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("customers.csv"))){
 
             StringBuilder headers = new StringBuilder();
             for(int i = 0; i < CustomerHeaders.values().length; i++){
