@@ -6,24 +6,17 @@ import org.example.service.impl.CustomerServiceImpl;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.exceptions.base.MockitoException;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -109,26 +102,29 @@ public class CustomerServiceTest {
     }
 
 
-//    @ParameterizedTest
-//    @ValueSource(doubles = {90.0, 81.8, 97.87})
-    @Test
-    public void getAllByCountryAndRatingSuccessful() {
+    @ParameterizedTest
+    @ValueSource(doubles = {90.0, 81.8, 97.87, 80.0005, 0.000067})
+//    @Test
+    public void getAllByCountryAndRatingTest(double value) {
 
         setUp();
 
-        List<Customer> list = List.of(customer1, customer2);
-        List<Customer> listByRating = list.stream()
-                .filter(c -> c.getRating().compareTo(BigDecimal.valueOf(83.057)) > 0)
+        CustomerDAO mockCustomerDAO = Mockito.mock(CustomerDAO.class);
+        customerService = new CustomerServiceImpl(mockCustomerDAO);
+
+        List<Customer> listByRating = Stream.of(customer1, customer2)
+                .filter(c -> c.getRating().compareTo(BigDecimal.valueOf(value)) > 0)
                 .toList();
 
-        customerService = new CustomerServiceImpl(customerDAO);
-        when(customerDAO.findByCountryAndRatingMoreThan("Ukraine", BigDecimal.valueOf(83.057)))
+
+        when(mockCustomerDAO.findByCountryAndRatingMoreThan("Ukraine", BigDecimal.valueOf(value)))
                 .thenReturn(listByRating);
 
         Assertions.assertEquals(listByRating.size(),
-                customerService.getAllByCountryAndRatingMoreThan("Ukraine", BigDecimal.valueOf(83.057)).size());
+                customerService.getAllByCountryAndRatingMoreThan("Ukraine", BigDecimal.valueOf(value)).size());
 
     }
+
 
     @Test
     public void saveAppendTestCase() throws IOException {
