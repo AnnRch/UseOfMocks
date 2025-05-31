@@ -62,6 +62,13 @@ public class CustomerDAO implements DAO<Customer>{
                 .toList();
     }
 
+    @Override
+    public List<Customer> findByCountryAndRatingMoreThan(String country, BigDecimal rating) {
+        return findByCountry(country).stream()
+                .filter(customer -> customer.getRating().compareTo(rating) > 0)
+                .toList();
+    }
+
 
     @Override
     public Customer save(Customer customer) {

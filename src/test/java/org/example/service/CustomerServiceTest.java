@@ -6,6 +6,7 @@ import org.example.service.impl.CustomerServiceImpl;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -15,6 +16,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.exceptions.base.MockitoException;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.FileNotFoundException;
@@ -106,35 +109,26 @@ public class CustomerServiceTest {
     }
 
 
-    @ParameterizedTest
-    @ValueSource(doubles = {90.0, 88.8, 97.87})
-    public void getAllByCountryAndRatingSuccessful(double value){
+//    @ParameterizedTest
+//    @ValueSource(doubles = {90.0, 81.8, 97.87})
+    @Test
+    public void getAllByCountryAndRatingSuccessful() {
 
         setUp();
 
-        customerList = new ArrayList<>();
-        customerList.add(customer1);
-        customerList.add(customer2);
+        List<Customer> list = List.of(customer1, customer2);
+        List<Customer> listByRating = list.stream()
+                .filter(c -> c.getRating().compareTo(BigDecimal.valueOf(83.057)) > 0)
+                .toList();
 
         customerService = new CustomerServiceImpl(customerDAO);
+        when(customerDAO.findByCountryAndRatingMoreThan("Ukraine", BigDecimal.valueOf(83.057)))
+                .thenReturn(listByRating);
 
-
-        BigDecimal bound = BigDecimal.valueOf(90.0);
-        BigDecimal rating = customerList.get(0).getRating();
-
-        bound = bound.setScale(2, RoundingMode.HALF_EVEN);
-        rating = rating.setScale(2,RoundingMode.HALF_EVEN);
-
-        Assertions.assertTrue(bound.compareTo(rating) < 0);
-
+        Assertions.assertEquals(listByRating.size(),
+                customerService.getAllByCountryAndRatingMoreThan("Ukraine", BigDecimal.valueOf(83.057)).size());
 
     }
-
-//    static Stream<Arguments> testCases(){
-//        return Stream.of(
-//              Arguments.of(90.0, List.of())
-//        );
-//    }
 
     @Test
     public void saveAppendTestCase() throws IOException {

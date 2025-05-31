@@ -41,9 +41,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<Customer> getAllByCountryAndRatingMoreThan(String country, BigDecimal rating) {
-        return customerDAO.findByCountry(country).stream()
-                .filter(customer -> customer.getRating().compareTo(rating) > 0)
-                .toList();
+        return customerDAO.findByCountryAndRatingMoreThan(country, rating);
     }
 
     @Override
