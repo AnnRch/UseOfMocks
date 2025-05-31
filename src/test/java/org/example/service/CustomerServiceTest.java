@@ -37,6 +37,7 @@ public class CustomerServiceTest {
     @InjectMocks
     private CustomerServiceImpl customerService;
 
+
     @BeforeEach
     public void init(){
         customer2 = Customer.builder()
@@ -137,7 +138,9 @@ public class CustomerServiceTest {
         customerList = new ArrayList<>();
         customerService = new CustomerServiceImpl(customerDAO);
 
-///        when(customerDAO.getById("122345")).thenReturn(null);
+          when(customerDAO.getById(customer1.getCustomerId())).thenReturn(null);
+          Assertions.assertNull(customerService.getCustomerById(customer1.getCustomerId()));
+
         when(customerDAO.save(customer1)).thenReturn(customer1);
         Assertions.assertSame(customer1, customerService.save(customer1));
     }
@@ -153,7 +156,9 @@ public class CustomerServiceTest {
 
         customerService = new CustomerServiceImpl(customerDAO);
 
-//        when(customerDAO.getById("122345")).thenReturn(customer1);
+        when(customerDAO.getById(customer1.getCustomerId())).thenReturn(customer1);
+        Assertions.assertSame(customer1, customerService.getCustomerById(customer1.getCustomerId()));
+
         when(customerDAO.save(customer1)).thenReturn(customer1);
         Assertions.assertSame(customer1, customerService.save(customer1));
     }
