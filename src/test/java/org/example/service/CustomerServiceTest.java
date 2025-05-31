@@ -10,6 +10,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 
@@ -104,8 +106,9 @@ public class CustomerServiceTest {
     }
 
 
-    @Test
-    public void getAllByCountryAndRatingSuccessful(){
+    @ParameterizedTest
+    @ValueSource(doubles = {90.0, 88.8, 97.87})
+    public void getAllByCountryAndRatingSuccessful(double value){
 
         setUp();
 
@@ -113,7 +116,6 @@ public class CustomerServiceTest {
         customerList.add(customer1);
         customerList.add(customer2);
 
-        System.out.println(customer2);
         customerService = new CustomerServiceImpl(customerDAO);
 
 
@@ -124,11 +126,13 @@ public class CustomerServiceTest {
         rating = rating.setScale(2,RoundingMode.HALF_EVEN);
 
         Assertions.assertTrue(bound.compareTo(rating) < 0);
+
+
     }
 
 //    static Stream<Arguments> testCases(){
 //        return Stream.of(
-//              Arguments.of()
+//              Arguments.of(90.0, List.of())
 //        );
 //    }
 
